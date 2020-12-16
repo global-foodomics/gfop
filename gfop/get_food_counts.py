@@ -39,11 +39,9 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
     A count indicates a spectral match between a reference food and the study sample.
 
     Args:
-        gnps_network (string): path to tsv file generated from classical molecular
-                               networking with study dataset(s) and reference dataset.
-        sample_types (string): one of 'simple', 'complex', or 'None'.
-                               Simple foods are single ingredients while complex foods contain multiple ingredients.
-                               'None' will return both simple and complex foods.
+        gnps_network (dataframe): tsv file generated from classical molecular networking
+                                  with study dataset(s) and reference dataset.
+        sample_types (dataframe): obtained using get_sample_types().
         all_groups (list): can contain 'G1', 'G2' to denote study spectrum files.
         some_groups (list): can contain 'G3', 'G4' to denote reference spectrum files.
         filename (string): name of study sample mzXML file.
@@ -52,15 +50,13 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
     Return:
         A vector
     Examples:
-        get_file_food_counts(gnps_network = 'METABOLOMICS-SNETS-V2-07f85565-view_all_clusters_withID_beta-main.tsv',
-                             sample_types = 'simple',
+        get_file_food_counts(gnps_network = gnps_network,
+                             sample_types = sample_types,
                              all_groups = ['G1'],
                              some_groups = ['G4'],
                              filename = 'sample1.mzXML',
                              level = 5)
     """
-    gnps_network = pd.read_csv(gnps_network, sep='\t')
-    sample_types = get_sample_types(sample_types)
     # Select GNPS job groups.
     groups = {f'G{i}' for i in range(1, 7)}
     groups_excluded = groups - set([*all_groups, *some_groups])
@@ -97,7 +93,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
     Args:
         gnps_network (string): path to tsv file generated from classical molecular.
                                networking with study dataset(s) and reference dataset.
-        metadata (string): path to sample metadata csv file.
+        metadata (string): path to sample metadata (comma- or tab-separated) file.
                            Must contain a column with mzXML file names that match those used in the molecular networking job.
         filename_col (string): name of column header containing file names.
         sample_types (string): one of 'simple', 'complex', or 'None'.
@@ -121,7 +117,11 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
                                 save_name = "food_counts_L5")
     """
     food_counts, filenames = [], []
-    metadata = pd.read_csv(metadata)
+    gnps_network = pd.read_csv(gnps_network, sep='\t')
+    sample_types = get_sample_types(sample_types)
+    if metadata.endswith('.csv'): delim = ','
+    else: delim = '/t'
+    metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata[metadata[filename_col].notnull()]
     for filename in metadata[filename_col]:
         file_food_counts = get_file_food_counts(gnps_network, sample_types, all_groups, some_groups, [filename], level)
