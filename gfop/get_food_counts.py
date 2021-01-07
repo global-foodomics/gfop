@@ -86,7 +86,7 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
 
 def get_dataset_food_counts(gnps_network, metadata, filename_col,
                             sample_types, all_groups, some_groups,
-                            level, save_name):
+                            level):
     """
     Generate a table of food counts for a study dataset.
 
@@ -103,9 +103,8 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
         some_groups (list): can contain 'G3', 'G4' to denote reference spectrum files.
         level (integer): indicates the level of the food ontology to use.
                          One of 1, 2, 3, 4, 5, or 6.
-        save_name (string): path/file name to save food counts table.
     Return:
-        A data frame. The data frame is also saved as a csv file to the specified directory.
+        A data frame
     Examples:
         get_dataset_food_counts(gnps_network = 'METABOLOMICS-SNETS-V2-07f85565-view_all_clusters_withID_beta-main.tsv',
                                 metadata = 'sample_metadata.csv',
@@ -113,8 +112,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
                                 sample_types = 'simple',
                                 all_groups = ['G1'],
                                 some_groups = ['G4'],
-                                level = 5,
-                                save_name = "food_counts_L5")
+                                level = 5)
     """
     food_counts, filenames = [], []
     gnps_network = pd.read_csv(gnps_network, sep='\t')
@@ -130,5 +128,4 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
             filenames.append(filename)
     food_counts = (pd.concat(food_counts, axis=1, sort=True).fillna(0).astype(int).T)
     food_counts.index = pd.Index(filenames, name='filename')
-    food_counts.to_csv(save_name + '.csv')
     return food_counts
