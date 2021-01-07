@@ -36,8 +36,7 @@ Current functionality includes generating food counts tables from a molecular ne
                                             sample_types = 'simple',
                                             all_groups = ['G1'],
                                             some_groups = ['G4'],
-                                            level = 5,
-                                            save_name = "food_counts_L5")
+                                            level = 5)
     ```
     
     You can type `help(gfop.get_dataset_food_counts)` for more information about the required arguments.
