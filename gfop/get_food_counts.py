@@ -119,7 +119,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
     sample_types = get_sample_types(sample_types)
     delim = ',' if metadata.endswith('.csv') else '\t'
     metadata = pd.read_csv(metadata, sep=delim)
-    metadata = metadata[metadata[filename_col].notnull()]
+    metadata = metadata.dropna(subset=[filename_col])
     for filename in metadata[filename_col]:
         file_food_counts = get_file_food_counts(gnps_network, sample_types, all_groups, some_groups, [filename], level)
         if len(file_food_counts) > 0:
