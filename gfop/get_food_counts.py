@@ -15,17 +15,17 @@ def load_food_metadata():
     return gfop_metadata
 
 
-def get_sample_types(simple_complex='None'):
+def get_sample_types(simple_complex='all'):
     """
     Return:
         Global FoodOmics ontology containing only simple, only complex, or all foods.
     Args:
-        simple_complex (string): one of 'simple', 'complex', or 'None'.
+        simple_complex (string): one of 'simple', 'complex', or 'all'.
                                  Simple foods are single ingredients while complex foods contain multiple ingredients.
-                                 'None' will return both simple and complex foods.
+                                 'all' will return both simple and complex foods.
     """
     gfop_metadata = load_food_metadata()
-    if simple_complex is not 'None':
+    if simple_complex is not 'all':
         gfop_metadata = gfop_metadata[gfop_metadata['simple_complex'] == simple_complex]
     col_sample_types = ['sample_name'] + [f'sample_type_group{i}' for i in range(1, 7)]
     return (gfop_metadata[['filename', *col_sample_types]]
@@ -103,9 +103,9 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
         metadata (string): path to sample metadata (comma- or tab-separated) file.
                            Must contain a column with mzXML file names that match those used in the molecular networking job.
         filename_col (string): name of metadata column header containing file names.
-        sample_types (string): one of 'simple', 'complex', or 'None'.
+        sample_types (string): one of 'simple', 'complex', or 'all'.
                                Simple foods are single ingredients while complex foods contain multiple ingredients.
-                               'None' will return both simple and complex foods.
+                               'all' will return both simple and complex foods.
         all_groups (list): can contain 'G1', 'G2' to denote study spectrum files.
         some_groups (list): can contain 'G3', 'G4' to denote reference spectrum files.
         level (integer): indicates the level of the food ontology to use.
