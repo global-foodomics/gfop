@@ -25,7 +25,7 @@ def get_sample_types(simple_complex='all'):
                                  'all' will return both simple and complex foods.
     """
     gfop_metadata = load_food_metadata()
-    if simple_complex is not 'all':
+    if simple_complex != 'all':
         gfop_metadata = gfop_metadata[gfop_metadata['simple_complex'] == simple_complex]
     col_sample_types = ['sample_name'] + [f'sample_type_group{i}' for i in range(1, 7)]
     return (gfop_metadata[['filename', *col_sample_types]]
@@ -71,15 +71,12 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
     filenames = (df_selected['UniqueFileSources'].str.split('|')
                  .explode())
     # Select food hierarchy levels.
-    if level in range(1, 7):
-        sample_types = sample_types[f'sample_type_group{level}']
-    else:
-        sample_types = sample_types['sample_name']
+    sample_types = sample_types[f'sample_type_group{level}' if level > 0 else 'sample_name']
     # Match the GNPS job results to the food sample types.
     sample_types_selected = sample_types.reindex(filenames)
     sample_types_selected = sample_types_selected.dropna()
     # Discard samples that occur less frequent than water (blank).
-    if level in range(1, 7):
+    if level > 0:
         water_count = (sample_types_selected == 'water').sum()
     else:
         water_count = 0 # TO-DO implement filtering for file-level counts
