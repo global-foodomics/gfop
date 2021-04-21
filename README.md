@@ -3,10 +3,10 @@
 Current functionality includes generating food counts tables from a molecular network (sample data networked with reference data using classical molecular networking). Follow [Reference Data-Driven Analysis tutorial](https://docs.google.com/document/d/15PzVIoDcONCCaAe8GDEM8YBGTdrgDTFA-7VqWjrqEFM/edit?usp=sharing) to run the networking job in GNPS.
 
 ## Usage:
-1. Clone develop branch of this repository
+1. Clone `main` branch of this repository
 
     ```
-    git clone -b develop https://github.com/ka-west/gfop.git
+    git clone -b main https://github.com/ka-west/gfop.git
     ```
 
 2. Navigate to the package directory
