@@ -33,7 +33,7 @@ def get_sample_types(simple_complex='all'):
 
 
 def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
-                         filename, level):
+                         filename, level=0, ref_metadata='gfop', agg_var=None):
     """
     Generate food counts for an individual sample in a study dataset.
     A count indicates a spectral match between a reference food and the study sample.
@@ -48,6 +48,11 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
         level (integer): indicates the level of the food ontology to use.
                          One of 1, 2, 3, 4, 5, 6, or 0.
                          0 will return counts for individual reference spectrum files, rather than food categories.
+        ref_metadata (dataframe): when using reference data other than the Global FoodOmics dataset, specify the path to the reference metadata file.
+                                  Must have a column 'filename' containing reference sample file names.
+        agg_var (string): argument must be provided if ref_metadata is provided.
+                          Column header from the reference metadata that will be used to aggregate the counts.
+                          Specify column header for sample/file names if count aggregation is not desired.
     Return:
         A vector
     Examples:
@@ -89,8 +94,8 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
 
 
 def get_dataset_food_counts(gnps_network, metadata, filename_col,
-                            sample_types, all_groups, some_groups,
-                            level):
+                            sample_types='all', all_groups, some_groups,
+                            level=0, ref_metadata='gfop', agg_var=None):
     """
     Generate a table of food counts for a study dataset.
 
@@ -108,6 +113,12 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
         level (integer): indicates the level of the food ontology to use.
                          One of 1, 2, 3, 4, 5, 6, or 0.
                          0 will return counts for individual reference spectrum files, rather than food categories.
+        ref_metadata (string): when using reference data other than the Global FoodOmics dataset, specify the path to the reference metadata file.
+                               Must have a column 'filename' containing reference sample file names.
+        agg_var (string): argument must be provided if ref_metadata is provided.
+                          Column header from the reference metadata that will be used to aggregate the counts.
+                          Specify column header for sample/file names if count aggregation is not desired.
+
     Return:
         A data frame
     Examples:
@@ -121,7 +132,12 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
     """
     food_counts, filenames = [], []
     gnps_network = pd.read_csv(gnps_network, sep='\t')
-    sample_types = get_sample_types(sample_types)
+    if ref_metadata != 'gfop':
+        delim = ',' if ref_metadata.endswith('.csv') else '\t'
+        sample_types = pd.read_csv(ref_metadata, sep=delim)[['filename', agg_var]]
+                       .set_index('filename')
+    else:
+        sample_types = get_sample_types(sample_types)
     delim = ',' if metadata.endswith('.csv') else '\t'
     metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata.dropna(subset=[filename_col])
