@@ -36,7 +36,7 @@ def get_sample_types(simple_complex='all', level=0):
 
 
 def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
-                         filename, level=0, ref_metadata='gfop', agg_var=None):
+                         filename, level=0):
     """
     Generate food counts for an individual sample in a study dataset.
     A count indicates a spectral match between a reference food and the study sample.
@@ -51,11 +51,6 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
         level (integer): indicates the level of the food ontology to use.
                          One of 1, 2, 3, 4, 5, 6, or 0.
                          0 will return counts for individual reference spectrum files, rather than food categories.
-        ref_metadata (dataframe): when using reference data other than the Global FoodOmics dataset, specify the path to the reference metadata file.
-                                  Must have a column 'filename' containing reference sample file names.
-        agg_var (string): argument must be provided if ref_metadata is provided.
-                          Column header from the reference metadata that will be used to aggregate the counts.
-                          Specify column header for sample/file names if count aggregation is not desired.
     Return:
         A vector
     Examples:
@@ -89,9 +84,10 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
     sample_counts = sample_types_selected.value_counts()
     sample_counts_valid = sample_counts.index[sample_counts > water_count]
     sample_types_selected = sample_types_selected[
-        sample_types_selected.isin(sample_counts_valid)]
+        sample_types_selected.isin(sample_counts_valid.get_level_values(level=0))]
     # Get sample counts at the specified level.
-    return sample_types_selected.value_counts()
+    sample_types_selected_counts = sample_types_selected.value_counts().reset_index() # get rid of multi-index
+    return sample_types_selected_counts.set_index(sample_types_selected_counts.columns[0])
 
 
 def get_dataset_food_counts(gnps_network, metadata, filename_col,
@@ -137,7 +133,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
         delim = ',' if ref_metadata.endswith('.csv') else '\t'
         sample_types = pd.read_csv(ref_metadata, sep=delim)[['filename', agg_var]].set_index('filename')
     else:
-        sample_types = get_sample_types(sample_types)
+        sample_types = get_sample_types(sample_types, level)
     delim = ',' if metadata.endswith('.csv') else '\t'
     metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata.dropna(subset=[filename_col])
