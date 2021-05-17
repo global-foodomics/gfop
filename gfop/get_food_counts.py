@@ -31,8 +31,8 @@ def get_sample_types(simple_complex='all', level=0):
     if simple_complex != 'all':
         gfop_metadata = gfop_metadata[gfop_metadata['simple_complex'] == simple_complex]
     # Select food hierarchy level.
-    col_sample_types = [f'sample_type_group{level}' if level > 0 else 'sample_name']
-    return (gfop_metadata[['filename', *col_sample_types]].set_index('filename'))
+    col_sample_types = f'sample_type_group{level}' if level > 0 else 'sample_name'
+    return (gfop_metadata[['filename', col_sample_types]].set_index('filename'))
 
 
 def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
@@ -114,7 +114,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
                                Must have a column 'filename' containing reference sample file names.
         agg_var (string): argument must be provided if ref_metadata is provided.
                           Column header from the reference metadata that will be used to aggregate the counts.
-                          Specify column header for sample/file names if count aggregation is not desired.
+                          Specify column header for sample names if count aggregation is not desired.
 
     Return:
         A data frame
