@@ -84,10 +84,10 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
     sample_counts = sample_types_selected.value_counts()
     sample_counts_valid = sample_counts.index[sample_counts > water_count]
     sample_types_selected = sample_types_selected[
-        sample_types_selected.isin(sample_counts_valid.get_level_values(level=0))]
+        sample_types_selected.isin(sample_counts_valid)]
     # Get sample counts at the specified level.
-    sample_types_selected_counts = sample_types_selected.value_counts().reset_index() # get rid of multi-index
-    return sample_types_selected_counts.set_index(sample_types_selected_counts.columns[0])
+    sample_types_selected_counts = sample_types_selected.value_counts()
+    return sample_types_selected_counts
 
 
 def get_dataset_food_counts(gnps_network, metadata, filename_col,
@@ -134,6 +134,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
         sample_types = pd.read_csv(ref_metadata, sep=delim)[['filename', agg_var]].set_index('filename')
     else:
         sample_types = get_sample_types(sample_types, level)
+    sample_types = sample_types.squeeze()
     delim = ',' if metadata.endswith('.csv') else '\t'
     metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata.dropna(subset=[filename_col])
