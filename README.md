@@ -1,6 +1,6 @@
 # Global FoodOmics package
 
-Current functionality includes generating food counts tables from a molecular network (sample data networked with reference data using classical molecular networking). Follow [Reference Data-Driven Analysis tutorial](https://docs.google.com/document/d/15PzVIoDcONCCaAe8GDEM8YBGTdrgDTFA-7VqWjrqEFM/edit?usp=sharing) to run the networking job in GNPS.
+Current functionality includes generating food counts tables from a molecular network (sample data networked with reference data using classical molecular networking). Follow [Reference Data-Driven Analysis tutorial](https://ccms-ucsd.github.io/GNPSDocumentation/tutorials/rdd/) to run the networking job in GNPS.
 
 ## Usage:
 1. Clone `main` branch of this repository
