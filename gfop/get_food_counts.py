@@ -1,4 +1,3 @@
-import pkg_resources
 import numpy as np
 import pandas as pd
 
@@ -7,8 +6,7 @@ def load_food_metadata():
     """
     Return: a dataframe containing Global FoodOmics ontology and metadata.
     """
-    stream = pkg_resources.resource_stream(__name__, 'data/foodomics_multiproject_metadata.txt')
-    gfop_metadata = pd.read_csv(stream, sep='\t')
+    gfop_metadata = pd.read_csv('https://github.com/global-foodomics/GFOPontology/raw/master/data/foodomics_metadata_foodmasst.tsv', sep='\t')
     # Remove trailing whitespace
     gfop_metadata = gfop_metadata.apply(lambda col: col.str.strip()
                                         if col.dtype == 'object' else col)
