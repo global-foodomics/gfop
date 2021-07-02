@@ -42,20 +42,10 @@ def get_unique_features(gnps_network, sample_types):
     Return:
         Data frame
     """
-    # presence of each feature in each group
-    groups = sample_types.unique()
-    df = pd.DataFrame(index = gnps_network['cluster index'], columns=groups)
-    for g in groups:
-        # get filenames for g
-        g_fn = sample_types[sample_types.isin([g])]
-        # if any filenames in UniqueFileSources, keep row
-        feat_g = gnps_network[gnps_network['UniqueFileSources'].
-            apply(lambda cluster_fn: any(fn in cluster_fn for fn in g_fn.index))]
-        # add True for each cluster index found in g
-        df[g] = df.index.isin(feat_g['cluster index'].reset_index(drop=True))
-    # which rows have only 1 True (feature found in a single group)
-    keep = df[df.sum(axis=1) == 1]
-    return gnps_network[gnps_network['cluster index'].isin(keep.index)]
+    mask = np.zeros((len(gnps_network), sample_types.nunique()), bool)
+    for i, (_, filenames) in enumerate(sample_types.reset_index().groupby(sample_types.name)):
+        mask[:, i] = gnps_network['UniqueFileSources'].str.contains('|'.join(filenames['filename']))  # This is regex OR (|) matching.
+    return gnps_network.loc[mask.sum(axis=1) == 1]
 
 
 def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
@@ -164,7 +154,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
     metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata.dropna(subset=[filename_col])
     # filter to unique features
-    if unique_features == True:
+    if unique_features:
         gnps_network = get_unique_features(gnps_network, sample_types)
     for filename in metadata[filename_col]:
         file_food_counts = get_file_food_counts(gnps_network, sample_types, all_groups, some_groups, [filename], level)
