@@ -17,7 +17,7 @@ Make sure you have Python 3.6 or newer installed. You will also need the followi
 1. Clone `main` branch of this repository
 
     ```
-    git clone -b main https://github.com/ka-west/gfop.git
+    git clone -b main https://github.com/global-foodomics/gfop.git
     ```
 
 2. Navigate to the package directory
