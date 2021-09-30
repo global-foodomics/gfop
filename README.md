@@ -58,3 +58,8 @@ Make sure you have Python 3.6 or newer installed. You will also need the followi
     * `level` is an integer from 0-6 and dictates how broad or specific you want your food categories to be. Level 1 uses the most broad groupings (e.g. plant, animal). Level 6 uses the most specific groupings (e.g. strawberry, green grape). Level 0 indicates no groupings, counts will be returned for all individual reference samples. *Note: this will require matching reference sample names to the food metadata*   
    
     You can type `help(gfop.get_dataset_food_counts)` for more information about the required arguments.
+6. Save food counts as csv file   
+
+    ```
+    f_counts.to_csv('food_counts.csv')
+    ```
