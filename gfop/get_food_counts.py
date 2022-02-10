@@ -1,4 +1,3 @@
-import pkg_resources
 import numpy as np
 import pandas as pd
 
@@ -7,8 +6,7 @@ def load_food_metadata():
     """
     Return: a dataframe containing Global FoodOmics ontology and metadata.
     """
-    stream = pkg_resources.resource_stream(__name__, 'data/foodomics_multiproject_metadata.txt')
-    gfop_metadata = pd.read_csv(stream, sep='\t')
+    gfop_metadata = pd.read_csv('https://github.com/global-foodomics/GFOPontology/raw/master/data/foodomics_metadata_foodmasst.tsv', sep='\t')
     # Remove trailing whitespace
     gfop_metadata = gfop_metadata.apply(lambda col: col.str.strip()
                                         if col.dtype == 'object' else col)
@@ -33,6 +31,21 @@ def get_sample_types(simple_complex='all', level=0):
     # Select food hierarchy level.
     col_sample_types = f'sample_type_group{level}' if level > 0 else 'sample_name'
     return (gfop_metadata[['filename', col_sample_types]].set_index('filename'))
+
+
+def get_unique_features(gnps_network, sample_types):
+    """
+    Filter GNPS network to only features that are unique to individual samples or within a specified group
+    Args:
+        gnps_network (data frame): classical molecular networking with study dataset(s) and reference dataset.
+        sample_types (series): sample group for each reference filename
+    Return:
+        Data frame
+    """
+    mask = np.zeros((len(gnps_network), sample_types.nunique()), bool)
+    for i, (_, filenames) in enumerate(sample_types.reset_index().groupby(sample_types.name)):
+        mask[:, i] = gnps_network['UniqueFileSources'].str.contains('|'.join(filenames['filename']))  # This is regex OR (|) matching.
+    return gnps_network.loc[mask.sum(axis=1) == 1]
 
 
 def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
@@ -91,7 +104,7 @@ def get_file_food_counts(gnps_network, sample_types, all_groups, some_groups,
 
 
 def get_dataset_food_counts(gnps_network, metadata, filename_col,
-                            all_groups, some_groups, sample_types='all',
+                            all_groups, some_groups, unique_features, sample_types='all',
                             level=0, ref_metadata='gfop', agg_var=None):
     """
     Generate a table of food counts for a study dataset.
@@ -107,6 +120,7 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
                                'all' will return both simple and complex foods.
         all_groups (list): can contain 'G1', 'G2' to denote study spectrum files.
         some_groups (list): can contain 'G3', 'G4' to denote reference spectrum files.
+        unique_features (boolean): Should features be filtered to only those unique at the level or agg_var specified?
         level (integer): indicates the level of the food ontology to use.
                          One of 1, 2, 3, 4, 5, 6, or 0.
                          0 will return counts for individual reference spectrum files, rather than food categories.
@@ -125,7 +139,8 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
                                 sample_types = 'simple',
                                 all_groups = ['G1'],
                                 some_groups = ['G4'],
-                                level = 5)
+                                level = 5,
+                                unique_features = True)
     """
     food_counts, filenames = [], []
     gnps_network = pd.read_csv(gnps_network, sep='\t')
@@ -138,6 +153,9 @@ def get_dataset_food_counts(gnps_network, metadata, filename_col,
     delim = ',' if metadata.endswith('.csv') else '\t'
     metadata = pd.read_csv(metadata, sep=delim)
     metadata = metadata.dropna(subset=[filename_col])
+    # filter to unique features
+    if unique_features:
+        gnps_network = get_unique_features(gnps_network, sample_types)
     for filename in metadata[filename_col]:
         file_food_counts = get_file_food_counts(gnps_network, sample_types, all_groups, some_groups, [filename], level)
         if len(file_food_counts) > 0:
